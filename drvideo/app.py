@@ -22,6 +22,11 @@ with st.sidebar:
     top_k = st.number_input("Top-K retrieved frames", 1, 20, config.TOP_K)
     max_rounds = st.number_input("Maximum agent rounds", 0, 5, config.MAX_ROUNDS)
 
+if not (config.BASE_URL and config.API_KEY):
+    st.error("BASE_URL and API_KEY are not set. Copy .env.example to .env and fill them in, "
+             "or set them as environment variables, then restart the app.")
+    st.stop()
+
 upload = st.file_uploader("Video", type=["mp4", "mov", "avi", "mkv", "webm"])
 question = st.text_input("Question")
 options = st.text_area("Answer choices (optional, one per line)", placeholder="A. ...\nB. ...", height=100)
@@ -57,9 +62,9 @@ def answer_question():
     frames, document = load_video(upload.getvalue(), fps, max_frames)
     st.write(f"Video document: {len(document)} frames.")
 
-    if len(pipeline.to_text(document)) / 4 > config.NUM_CTX * 0.8:  # ~4 characters per token
+    if len(pipeline.to_text(document)) / 4 > config.CONTEXT_TOKENS * 0.8:  # ~4 characters per token
         st.warning("The document may not fit in the model's context window. "
-                   "Lower the frame count or raise NUM_CTX in config.py.")
+                   "Lower the sampling rate or the maximum number of frames.")
 
     with st.status("Running DrVideo...", expanded=True) as status:
         for step, data in pipeline.run(document, frames, question, options, top_k, max_rounds):
@@ -99,5 +104,5 @@ if st.button("Answer", type="primary", disabled=not (upload and question.strip()
     try:
         answer_question()
     except requests.RequestException as error:
-        st.error(f"Could not reach Ollama at {config.OLLAMA_URL} with model {config.MODEL}. "
-                 f"Is Ollama running and the model installed? ({error})")
+        st.error(f"The model API call failed ({config.BASE_URL}, model {config.MODEL}). "
+                 f"Check BASE_URL, API_KEY and MODEL. Details: {error}")

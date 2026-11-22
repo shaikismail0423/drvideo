@@ -13,7 +13,7 @@ import re
 import numpy as np
 
 import prompts
-from ollama_client import chat, chat_json, embed
+from llm_client import chat, chat_json, embed
 
 
 # --- 3.1 Video-document conversion ------------------------------------------
