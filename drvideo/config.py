@@ -23,7 +23,7 @@ _load_env_file()
 
 # OpenAI-compatible endpoint serving Qwen2.5-VL (vLLM, DashScope, LM Studio, Ollama's /v1, ...).
 BASE_URL = os.getenv("BASE_URL", "").rstrip("/")   # e.g. http://your-server:8000/v1
-API_KEY = os.getenv("API_KEY", "")
+API_KEY = os.getenv("API_KEY", "")                # can be empty if the server needs no key
 
 # One model plays every role: frame captioner, augmenter (VQA) and the three agents.
 MODEL = os.getenv("MODEL", "Qwen/Qwen2.5-VL-7B-Instruct")
@@ -34,7 +34,7 @@ EMBED_MODEL = os.getenv("EMBED_MODEL", "")
 
 # Rough size of the model's context window, in tokens. Only used to warn when the
 # video document is likely too long; the real limit is set on the server.
-CONTEXT_TOKENS = int(os.getenv("CONTEXT_TOKENS", "32000"))
+CONTEXT_TOKENS = int(os.getenv("CONTEXT_TOKENS") or 32000)
 
 MAX_TOKENS = 1024     # longest reply allowed from the model
 TIMEOUT = 300         # seconds to wait for one reply

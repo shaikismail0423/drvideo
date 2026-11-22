@@ -20,6 +20,7 @@ MODEL=Qwen/Qwen2.5-VL-7B-Instruct
 
 `BASE_URL` is the part before `/chat/completions`, usually ending in `/v1`.
 `MODEL` must be the exact model name your server reports at `{BASE_URL}/models`.
+`API_KEY` can be left empty if your server does not need one.
 Environment variables with the same names override the `.env` file.
 `.env` is git-ignored, so the key is never committed.
 
@@ -29,10 +30,11 @@ Environment variables with the same names override the `.env` file.
 streamlit run app.py
 ```
 
-To use it from other machines on the office network:
+To use it from other machines on the office network, and allow uploads up to 2 GB
+(Streamlit's default limit is 200 MB):
 
 ```bash
-streamlit run app.py --server.address 0.0.0.0 --server.port 8501
+streamlit run app.py --server.address 0.0.0.0 --server.port 8501 --server.maxUploadSize 2048
 ```
 
 ## How it maps to the paper

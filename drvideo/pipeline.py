@@ -49,7 +49,7 @@ def retrieve(document, question, k):
     method = "embeddings"
     if vectors is None:
         vectors = _keyword_vectors(texts)
-        method = "keywords (embedding model unavailable)"
+        method = "keyword similarity"
 
     vectors = np.array(vectors, dtype=float)
     vectors /= np.linalg.norm(vectors, axis=1, keepdims=True) + 1e-9
@@ -88,7 +88,7 @@ def augment(document, frames, requests, question):
 
 def plan(document, question, memory):
     """Planning agent: is the document sufficient to answer? Returns (sufficient, explanation)."""
-    reply = chat_json(prompts.PLANNING.format(**_header(document), question=question, memory=_memory_text(memory)))
+    reply = chat_json(prompts.PLANNING.format(**_header(document), question=question, memory="\n".join(memory)))
     explanation = reply.get("explanation", "")
     if isinstance(explanation, list):
         explanation = " ".join(map(str, explanation))
@@ -102,7 +102,7 @@ def find_missing(document, question, memory, have, max_frames):
     Returns a list of (frame_id, type).
     """
     reply = chat_json(prompts.INTERACTION.format(
-        **_header(document), question=question, memory=_memory_text(memory), max_frames=max_frames,
+        **_header(document), question=question, memory="\n".join(memory), max_frames=max_frames,
         have_a=sorted(have["A"]) or "none", have_b=sorted(have["B"]) or "none",
     ))
     items = reply.get("frames")
@@ -172,7 +172,3 @@ def _header(document):
         "total": len(document),
         "document": to_text(document),
     }
-
-
-def _memory_text(memory):
-    return "\n".join(memory)

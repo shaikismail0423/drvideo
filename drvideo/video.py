@@ -6,27 +6,26 @@ import config
 
 
 def sample_frames(path, fps, max_frames):
-    """Sample frames at `fps` (sparser if that would exceed `max_frames`).
+    """Sample frames at `fps`, then thin them evenly if there are more than `max_frames`.
 
     Returns a list of (timestamp_in_seconds, jpeg_bytes).
     """
     capture = cv2.VideoCapture(path)
     video_fps = capture.get(cv2.CAP_PROP_FPS) or 25
-    total = int(capture.get(cv2.CAP_PROP_FRAME_COUNT))
-
-    step = max(1, round(video_fps / fps))
-    if total / step > max_frames:
-        step = -(-total // max_frames)  # ceiling division
+    step = max(1, round(video_fps / fps))  # keep one frame in every `step`
 
     frames = []
     index = 0
-    while len(frames) < max_frames and capture.grab():
+    while capture.grab():  # grab() is cheap; only decode the frames we keep
         if index % step == 0:
             ok, image = capture.retrieve()
             if ok:
                 frames.append((index / video_fps, _to_jpeg(image)))
         index += 1
     capture.release()
+
+    if len(frames) > max_frames:  # spread the kept frames over the whole video
+        frames = [frames[i * len(frames) // max_frames] for i in range(max_frames)]
     return frames
 
 
